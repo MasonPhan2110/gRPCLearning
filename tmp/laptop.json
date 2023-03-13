@@ -1,0 +1,62 @@
+{
+   "id":  "6d524e2a-4c54-4e79-ace8-60262f2ebe91",
+   "brand":  "Lenovo",
+   "name":  "Thinkpad P1",
+   "cpu":  {
+      "brand":  "Intel",
+      "name":  "Core i5 13600KF",
+      "number_cores":  5,
+      "number_threads":  9,
+      "min_ghz":  2.0125420216025587,
+      "max_ghz":  3.6958677339254526
+   },
+   "ram":  {
+      "value":  "15",
+      "unit":  "GIGABYTE"
+   },
+   "gpus":  [
+      {
+         "brand":  "NVIDIA",
+         "name":  "GTX 1060",
+         "min_ghz":  1.3403274795535178,
+         "max_ghz":  1.9091908603925618,
+         "memory":  {
+            "value":  "6",
+            "unit":  "GIGABYTE"
+         }
+      }
+   ],
+   "storages":  [
+      {
+         "driver":  "SDD",
+         "memory":  {
+            "value":  "205",
+            "unit":  "GIGABYTE"
+         }
+      },
+      {
+         "driver":  "HDD",
+         "memory":  {
+            "value":  "4",
+            "unit":  "TERABYTE"
+         }
+      }
+   ],
+   "screen":  {
+      "size_inch":  15.437992,
+      "resolution":  {
+         "width":  6236,
+         "height":  3508
+      },
+      "panel":  "OLED",
+      "multitouch":  true
+   },
+   "keyboard":  {
+      "layout":  "QWERTZ",
+      "backlit":  false
+   },
+   "weight_kg":  2.829024450094003,
+   "price_usd":  1652.2055802694515,
+   "release_year":  2015,
+   "updated_at":  "2023-03-13T09:12:08.161894Z"
+}
