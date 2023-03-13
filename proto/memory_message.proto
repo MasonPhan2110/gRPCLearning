@@ -1,7 +1,7 @@
 syntax="proto3";
 
 package example.pcbook;
-option go_package = "example.pcbook";
+option go_package = "pb/";
 
 message Memory {
     enum Unit {
