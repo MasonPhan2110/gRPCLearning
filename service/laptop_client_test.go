@@ -14,8 +14,6 @@ import (
 	"example.com/pcbook/sample"
 	"example.com/pcbook/serializer"
 	"github.com/test-go/testify/require"
-
-	// "github.com/test-go/testify/require"
 	"google.golang.org/grpc"
 )
 
@@ -24,7 +22,7 @@ func TestClientCreatelaptop(t *testing.T) {
 
 	laptopStore := NewInMemoryLaptopStore()
 
-	serverAddress := startTestLaptopServer(t, laptopStore, nil)
+	serverAddress := startTestLaptopServer(t, laptopStore, nil, nil)
 
 	laptopClient := newTestLaptopClient(t, serverAddress)
 
@@ -104,7 +102,7 @@ func TestClientSearchlaptop(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	serverAddress := startTestLaptopServer(t, laptopStore, nil)
+	serverAddress := startTestLaptopServer(t, laptopStore, nil, nil)
 
 	laptopClient := newTestLaptopClient(t, serverAddress)
 	req := &pb.SearchLaptopRequest{Filter: filter}
@@ -136,7 +134,7 @@ func TestClientUploadImage(t *testing.T) {
 	err := laptopStore.Save(laptop)
 	require.NoError(t, err)
 
-	serverAddress := startTestLaptopServer(t, laptopStore, imageStore)
+	serverAddress := startTestLaptopServer(t, laptopStore, imageStore, nil)
 	laptopClient := newTestLaptopClient(t, serverAddress)
 
 	imagePath := fmt.Sprintf("%s/laptop.jpg", testImgFolder)
@@ -193,8 +191,55 @@ func TestClientUploadImage(t *testing.T) {
 
 }
 
-func startTestLaptopServer(t *testing.T, laptopStore LaptopStore, imageStore ImageStore) string {
-	laptopServer := NewLaptopServer(laptopStore, imageStore)
+func TestClientRateLaptop(t *testing.T) {
+	t.Parallel()
+
+	laptopStore := NewInMemoryLaptopStore()
+	ratingStore := NewInMemoryRatingStore()
+
+	laptop := sample.NewLaptop()
+	err := laptopStore.Save(laptop)
+	require.NoError(t, err)
+
+	serverAddress := startTestLaptopServer(t, laptopStore, nil, ratingStore)
+	laptopClient := newTestLaptopClient(t, serverAddress)
+
+	stream, err := laptopClient.Ratelaptop(context.Background())
+	require.NoError(t, err)
+
+	scores := []float64{8, 7.5, 10}
+	averages := []float64{8, 7.75, 8.5}
+
+	n := len(scores)
+
+	for i := 0; i < n; i++ {
+		req := &pb.RateLaptopRequest{
+			LapotopId: laptop.GetId(),
+			Score:     scores[i],
+		}
+
+		err := stream.Send(req)
+		require.NoError(t, err)
+	}
+
+	err = stream.CloseSend()
+	require.NoError(t, err)
+
+	for idx := 0; ; idx++ {
+		res, err := stream.Recv()
+		if err == io.EOF {
+			require.Equal(t, n, idx)
+			return
+		}
+		require.NoError(t, err)
+		require.Equal(t, laptop.GetId(), res.GetLapotopId())
+		require.Equal(t, uint32(idx+1), res.GetRatedCount())
+		require.Equal(t, averages[idx], res.GetAverageScore())
+	}
+}
+
+func startTestLaptopServer(t *testing.T, laptopStore LaptopStore, imageStore ImageStore, ratingStore RatingStore) string {
+	laptopServer := NewLaptopServer(laptopStore, imageStore, ratingStore)
 	grpcServer := grpc.NewServer()
 	pb.RegisterLaptopServiceServer(grpcServer, laptopServer)
 

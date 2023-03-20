@@ -22,6 +22,7 @@ const (
 	LaptopService_CreateLaptop_FullMethodName = "/example.pcbook.LaptopService/CreateLaptop"
 	LaptopService_SearchLaptop_FullMethodName = "/example.pcbook.LaptopService/SearchLaptop"
 	LaptopService_UploadImage_FullMethodName  = "/example.pcbook.LaptopService/UploadImage"
+	LaptopService_Ratelaptop_FullMethodName   = "/example.pcbook.LaptopService/Ratelaptop"
 )
 
 // LaptopServiceClient is the client API for LaptopService service.
@@ -31,6 +32,7 @@ type LaptopServiceClient interface {
 	CreateLaptop(ctx context.Context, in *CreateLaptopRequest, opts ...grpc.CallOption) (*CreateLaptopResponse, error)
 	SearchLaptop(ctx context.Context, in *SearchLaptopRequest, opts ...grpc.CallOption) (LaptopService_SearchLaptopClient, error)
 	UploadImage(ctx context.Context, opts ...grpc.CallOption) (LaptopService_UploadImageClient, error)
+	Ratelaptop(ctx context.Context, opts ...grpc.CallOption) (LaptopService_RatelaptopClient, error)
 }
 
 type laptopServiceClient struct {
@@ -116,6 +118,37 @@ func (x *laptopServiceUploadImageClient) CloseAndRecv() (*UploadImageResponse, e
 	return m, nil
 }
 
+func (c *laptopServiceClient) Ratelaptop(ctx context.Context, opts ...grpc.CallOption) (LaptopService_RatelaptopClient, error) {
+	stream, err := c.cc.NewStream(ctx, &LaptopService_ServiceDesc.Streams[2], LaptopService_Ratelaptop_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &laptopServiceRatelaptopClient{stream}
+	return x, nil
+}
+
+type LaptopService_RatelaptopClient interface {
+	Send(*RateLaptopRequest) error
+	Recv() (*RateLaptopResponse, error)
+	grpc.ClientStream
+}
+
+type laptopServiceRatelaptopClient struct {
+	grpc.ClientStream
+}
+
+func (x *laptopServiceRatelaptopClient) Send(m *RateLaptopRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *laptopServiceRatelaptopClient) Recv() (*RateLaptopResponse, error) {
+	m := new(RateLaptopResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // LaptopServiceServer is the server API for LaptopService service.
 // All implementations must embed UnimplementedLaptopServiceServer
 // for forward compatibility
@@ -123,6 +156,7 @@ type LaptopServiceServer interface {
 	CreateLaptop(context.Context, *CreateLaptopRequest) (*CreateLaptopResponse, error)
 	SearchLaptop(*SearchLaptopRequest, LaptopService_SearchLaptopServer) error
 	UploadImage(LaptopService_UploadImageServer) error
+	Ratelaptop(LaptopService_RatelaptopServer) error
 	mustEmbedUnimplementedLaptopServiceServer()
 }
 
@@ -138,6 +172,9 @@ func (UnimplementedLaptopServiceServer) SearchLaptop(*SearchLaptopRequest, Lapto
 }
 func (UnimplementedLaptopServiceServer) UploadImage(LaptopService_UploadImageServer) error {
 	return status.Errorf(codes.Unimplemented, "method UploadImage not implemented")
+}
+func (UnimplementedLaptopServiceServer) Ratelaptop(LaptopService_RatelaptopServer) error {
+	return status.Errorf(codes.Unimplemented, "method Ratelaptop not implemented")
 }
 func (UnimplementedLaptopServiceServer) mustEmbedUnimplementedLaptopServiceServer() {}
 
@@ -217,6 +254,32 @@ func (x *laptopServiceUploadImageServer) Recv() (*UploadImageRequest, error) {
 	return m, nil
 }
 
+func _LaptopService_Ratelaptop_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(LaptopServiceServer).Ratelaptop(&laptopServiceRatelaptopServer{stream})
+}
+
+type LaptopService_RatelaptopServer interface {
+	Send(*RateLaptopResponse) error
+	Recv() (*RateLaptopRequest, error)
+	grpc.ServerStream
+}
+
+type laptopServiceRatelaptopServer struct {
+	grpc.ServerStream
+}
+
+func (x *laptopServiceRatelaptopServer) Send(m *RateLaptopResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *laptopServiceRatelaptopServer) Recv() (*RateLaptopRequest, error) {
+	m := new(RateLaptopRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // LaptopService_ServiceDesc is the grpc.ServiceDesc for LaptopService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -238,6 +301,12 @@ var LaptopService_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "UploadImage",
 			Handler:       _LaptopService_UploadImage_Handler,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "Ratelaptop",
+			Handler:       _LaptopService_Ratelaptop_Handler,
+			ServerStreams: true,
 			ClientStreams: true,
 		},
 	},
