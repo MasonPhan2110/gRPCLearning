@@ -1,6 +1,6 @@
 gen:
 # protoc --proto_path=proto proto/*.proto --go_out=plugins=grpc:pb
-	protoc --go_out=.   --go-grpc_out=.  proto/*.proto
+	protoc  --go_out=.   --go-grpc_out=. --grpc-gateway_out=. --grpc-gateway_opt generate_unbound_methods=true --openapiv2_out ./swagger  proto/*.proto  
 rm:
 	rm -rf pb
 server1:
